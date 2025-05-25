@@ -1,0 +1,23 @@
+{
+  "name": "@leonid-shutov/loader",
+  "version": "0.0.1",
+  "author": "Leonid Shutov <leonid.shutov.main@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/leonid-shutov/loader#readme",
+  "main": "loader.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leonid-shutov/loader.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.30",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.0"
+  }
+}
