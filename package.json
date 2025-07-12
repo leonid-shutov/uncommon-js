@@ -5,6 +5,9 @@
   "license": "MIT",
   "homepage": "https://github.com/leonid-shutov/loader#readme",
   "main": "loader.js",
+  "scripts": {
+    "lint": "eslint lib/"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/leonid-shutov/loader.git"
@@ -14,11 +17,9 @@
   },
   "devDependencies": {
     "@types/node": "^20.17.30",
-    "eslint": "^8.45.0",
-    "eslint-config-prettier": "^8.6.0",
-    "eslint-plugin-import": "^2.23.4",
-    "eslint-plugin-prettier": "^5.0.0",
-    "prettier": "^3.0.0"
+    "eslint": "^9.31.0",
+    "eslint-config-metarhia": "^9.1.1",
+    "prettier": "^3.6.2"
   },
   "dependencies": {
     "metaschema": "^2.2.2"
