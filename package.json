@@ -1,16 +1,16 @@
 {
-  "name": "@leonid-shutov/loader",
-  "version": "1.0.0-alpha.5",
+  "name": "@leonid-shutov/uncommonjs",
+  "version": "1.0.0-alpha.1",
   "author": "Leonid Shutov <leonid.shutov.main@gmail.com>",
   "license": "MIT",
-  "homepage": "https://github.com/leonid-shutov/loader#readme",
-  "main": "loader.js",
+  "homepage": "https://github.com/leonid-shutov/uncommonjs#readme",
+  "main": "uncommon.js",
   "scripts": {
     "lint": "eslint lib/"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/leonid-shutov/loader.git"
+    "url": "git+https://github.com/leonid-shutov/uncommonjs.git"
   },
   "publishConfig": {
     "access": "public"
