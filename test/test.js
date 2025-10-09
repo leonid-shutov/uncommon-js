@@ -12,7 +12,7 @@ test('Methods', async () => {
   const context = vm.createContext({});
   await loadDir(context, context, PATH_TO_APPLICATION);
   const chestnut = context.application.chestnut;
-  assert.strictEqual(chestnut.size, 0);
+  assert.strictEqual(chestnut.isRipe(), false);
   chestnut.grow();
-  assert.strictEqual(chestnut.size, 1);
+  assert.strictEqual(chestnut.isRipe(), true);
 });
