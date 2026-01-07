@@ -3,6 +3,7 @@
 **uncommon‑js** — a utility library for Node.js that provides a custom module system based on code sandboxing, using isolated V8 contexts.
 
 # Example
+
 ```js
 ({
   create: {
@@ -24,8 +25,8 @@
     },
   },
 });
-
 ```
+
 ```js
 ({
   create: {
@@ -37,5 +38,4 @@
   getByCode: async (code) =>
     (await db.pg.query(`SELECT * FROM "public"."Book" WHERE code = $1`, [code])).rows[0] ?? null,
 });
-
 ```

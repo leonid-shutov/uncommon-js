@@ -16,3 +16,19 @@ test('Methods', async () => {
   chestnut.grow();
   assert.strictEqual(chestnut.isRipe(), true);
 });
+
+test('Getters', async () => {
+  const context = vm.createContext({});
+  await loadDir(context, context, PATH_TO_APPLICATION);
+  const chestnut = context.application.chestnut;
+  assert.strictEqual(chestnut.isEdible, true);
+});
+
+test('Service', async () => {
+  const context = vm.createContext({});
+  await loadDir(context, context, PATH_TO_APPLICATION);
+  const chestnut = context.application.chestnut;
+  assert.strictEqual(chestnut.isRotten, false);
+  chestnut.rot();
+  assert.strictEqual(chestnut.isRotten, true);
+});
