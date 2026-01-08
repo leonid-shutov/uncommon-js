@@ -18,10 +18,15 @@ test('Methods', async () => {
 });
 
 test('Getters', async () => {
-  const context = vm.createContext({});
+  const logs = [];
+  const mockedConsole = { log: (x) => logs.push(x) };
+  const context = vm.createContext({ console: mockedConsole });
   await loadDir(context, context, PATH_TO_APPLICATION);
+  assert.strictEqual(logs.length, 0);
   const chestnut = context.application.chestnut;
   assert.strictEqual(chestnut.isEdible, true);
+  assert.strictEqual(logs.length, 1);
+  assert.strictEqual(logs[0], `This shouldn't be logged during loading`);
 });
 
 test('Service', async () => {

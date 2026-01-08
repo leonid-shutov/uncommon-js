@@ -1,3 +1,6 @@
 'use strict';
 
-() => $.age < 3 && !$.isRotten;
+() => {
+  console.log(`This shouldn't be logged during loading`);
+  return $.age < 3 && !$.isRotten;
+};
