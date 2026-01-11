@@ -84,3 +84,10 @@ test('Getters', async (t) => {
     assert.strictEqual(logs[0], `This shouldn't be logged during loading`);
   });
 });
+
+test('Common', async () => {
+  const context = vm.createContext({});
+  await loadDir(context, context, PATH_TO_APPLICATION);
+  const testModule = context.application.commonDir.module;
+  assert.strictEqual(testModule.method(), 'common');
+});
