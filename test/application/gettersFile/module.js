@@ -1,0 +1,3 @@
+({
+  value: 'getters-file',
+});
