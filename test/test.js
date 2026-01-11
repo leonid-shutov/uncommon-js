@@ -78,8 +78,8 @@ test('Getters', async (t) => {
     const context = vm.createContext({ console: mockedConsole });
     await loadDir(context, context, PATH_TO_APPLICATION);
     assert.strictEqual(logs.length, 0);
-    const testModule = context.application.getterMethod.module;
-    assert.strictEqual(testModule.getter, 'getter-method');
+    const testModule = context.application.getterMethod;
+    assert.strictEqual(testModule.testGetterMethod, 'getter-method');
     assert.strictEqual(logs.length, 1);
     assert.strictEqual(logs[0], `This shouldn't be logged during loading`);
   });
