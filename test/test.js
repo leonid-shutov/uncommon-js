@@ -86,8 +86,16 @@ test('Getters', async (t) => {
 });
 
 test('Common', async () => {
-  const context = vm.createContext({});
+  const logs = [];
+  const mockedConsole = { log: (x) => logs.push(x) };
+  const context = vm.createContext({ console: mockedConsole });
   await loadDir(context, context, PATH_TO_APPLICATION);
   const testModule = context.application.commonDir.module;
   assert.strictEqual(testModule.method(), 'common');
+  const anotherModule = context.application.commonDir.anotherModule;
+  anotherModule.method();
+  // common directories should spawn separate context branches
+  assert.strictEqual(logs[0], 'foo is not defined');
+  assert.strictEqual(logs[1], 'bar');
+  assert.strictEqual(logs[2], 'common');
 });
