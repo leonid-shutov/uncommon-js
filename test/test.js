@@ -99,3 +99,15 @@ test('Common', async () => {
   assert.strictEqual(logs[1], 'bar');
   assert.strictEqual(logs[2], 'common');
 });
+
+test('Self Reference', async () => {
+  const logs = [];
+  const mockedConsole = { log: (x) => logs.push(x) };
+  const context = vm.createContext({ console: mockedConsole });
+  await loadDir(context, context, PATH_TO_APPLICATION);
+  const testModule = context.application.selfReference;
+  // files have access to both own and parent entries
+  testModule.obj.ownFun();
+  assert.strictEqual(logs[0], 'parent-value');
+  assert.strictEqual(logs[1], 'own-value');
+});
