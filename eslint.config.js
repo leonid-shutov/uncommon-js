@@ -16,7 +16,6 @@ module.exports = [
     languageOptions: {
       globals: {
         self: true,
-        $: true,
       },
     },
   },

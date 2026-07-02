@@ -1,4 +1,4 @@
 () => {
   console.log(`This shouldn't be logged during loading`);
-  return $.module.value;
+  return self.module.value;
 };

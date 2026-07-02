@@ -1,5 +1,5 @@
 (x) => {
-  console.log($.foo);
-  console.log($.anotherModule.bar);
+  console.log(self.foo);
+  console.log(self.anotherModule.bar);
   console.log(x);
 };
