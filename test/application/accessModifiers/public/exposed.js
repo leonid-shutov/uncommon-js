@@ -1,0 +1,1 @@
+({ value: 'exposed-value' });
