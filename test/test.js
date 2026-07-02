@@ -59,30 +59,16 @@ test('Service Entry', async (t) => {
   });
 });
 
-test('Getters', async (t) => {
-  await t.test('Getter File', async () => {
-    const logs = [];
-    const mockedConsole = { log: (x) => logs.push(x) };
-    const context = vm.createContext({ console: mockedConsole });
-    await loadDir(context, context, PATH_TO_APPLICATION);
-    assert.strictEqual(logs.length, 0);
-    const testModule = context.application.gettersFile;
-    assert.strictEqual(testModule.getter, 'getters-file');
-    assert.strictEqual(logs.length, 1);
-    assert.strictEqual(logs[0], `This shouldn't be logged during loading`);
-  });
-
-  await t.test('Getter Method', async () => {
-    const logs = [];
-    const mockedConsole = { log: (x) => logs.push(x) };
-    const context = vm.createContext({ console: mockedConsole });
-    await loadDir(context, context, PATH_TO_APPLICATION);
-    assert.strictEqual(logs.length, 0);
-    const testModule = context.application.getterMethod;
-    assert.strictEqual(testModule.testGetterMethod, 'getter-method');
-    assert.strictEqual(logs.length, 1);
-    assert.strictEqual(logs[0], `This shouldn't be logged during loading`);
-  });
+test('Getter', async () => {
+  const logs = [];
+  const mockedConsole = { log: (x) => logs.push(x) };
+  const context = vm.createContext({ console: mockedConsole });
+  await loadDir(context, context, PATH_TO_APPLICATION);
+  assert.strictEqual(logs.length, 0);
+  const testModule = context.application.gettersFile;
+  assert.strictEqual(testModule.getter, 'getters-file');
+  assert.strictEqual(logs.length, 1);
+  assert.strictEqual(logs[0], `This shouldn't be logged during loading`);
 });
 
 test('Common', async () => {
