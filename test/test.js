@@ -96,6 +96,8 @@ test('Self Reference', async () => {
   testModule.obj.ownFun();
   assert.strictEqual(logs[0], 'parent-value');
   assert.strictEqual(logs[1], 'own-value');
+  // module's self doesn't include object entries
+  assert.strictEqual(testModule.ownSelf(), undefined);
 });
 
 test('Access Modifiers', async () => {
