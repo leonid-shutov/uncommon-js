@@ -104,7 +104,7 @@ The tree shape defines the module graph:
 | `(common)/` _(reserved)_      | Loaded **first**, into the **parent** context — shared with every sibling module.                                       |
 | `(getters)/` _(reserved)_     | Each file is `() => value` and becomes a **lazy getter** (runs on first access).                                        |
 | `(private)/` _(reserved)_     | Files load into the module's `self` only — internal, hidden from the outside.                                           |
-| `(anythingElse)/`             | Any other parenthesized name is **grouping only**; files load in flat. `(methods)`, `(handlers)`, etc. are not special. |
+| `(anythingElse)/`             | Any other parenthesized name is **grouping only** and fully transparent; its files _and_ subdirectories load in flat, as if they lived in the parent. `(methods)`, `(handlers)`, etc. are not special. |
 | plain-named dir               | Becomes a nested submodule (`user/profile/` → `app.user.profile`).                                                      |
 
 Only `(common)`, `(getters)`, and `(private)` are reserved.

@@ -1,0 +1,3 @@
+({
+  callGrouped: () => Grouped.fun(),
+});
