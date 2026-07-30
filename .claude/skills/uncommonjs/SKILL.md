@@ -96,8 +96,9 @@ The tree shape defines the module graph. Rules (from `lib/loader.js`):
   property on the module; the function runs on first access, not at load time.
 - **`(private)/`** *(reserved)* — files load into the module's `self` **only**. Visible
   internally via `self.x`, but **not** on the module from the outside.
-- **`(anythingElse)/`** — any *other* parenthesized directory name is **grouping only**: its
-  files load into the module as if they were flat. `(methods)`, `(public)`, `(handlers)` etc.
+- **`(anythingElse)/`** — any *other* parenthesized directory name is **grouping only** and
+  fully transparent: its files **and subdirectories** load into the module as if they were
+  flat, as though the group folder weren't there. `(methods)`, `(public)`, `(handlers)` etc.
   are **not** special — they only organize files visually. Only `(common)`, `(getters)`,
   `(private)` are reserved.
 - **plain-named dir** — becomes a nested submodule (`user/profile/` → `app.user.profile`).
@@ -274,8 +275,9 @@ Resulting sandbox: `app.book.table`, `app.book.create(...)`, `app.book.count` (g
   can depend on it. Non-common siblings don't see each other except through `self`.
 - Numbered prefixes only affect load order and are stripped from keys — don't reference them
   by the prefixed name.
-- `(methods)`, `(public)`, `(handlers)`… are just grouping folders; only `(common)`,
-  `(getters)`, `(private)` change loading behavior.
+- `(methods)`, `(public)`, `(handlers)`… are just grouping folders; they are transparent to
+  both files and subdirectories. Only `(common)`, `(getters)`, `(private)` change loading
+  behavior.
 - Utilities you see in a consumer app's `src/(common)/` (e.g. tuigram's `risk`, `LinkedList`,
   `Obj`) belong to *that app*, not to uncommon-js. The library ships only the loader, error
   classes, and REST helpers.

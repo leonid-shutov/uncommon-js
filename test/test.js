@@ -86,6 +86,16 @@ test('Common', async () => {
   assert.strictEqual(logs[2], 'common');
 });
 
+test('Group Directory', async () => {
+  const context = vm.createContext({});
+  await loadDir(context, context, PATH_TO_APPLICATION);
+  const testModule = context.application.groupDir;
+  // group inside (common): subdir members are hoisted to shared globals
+  assert.strictEqual(testModule.module.callGrouped(), 'grouped-global');
+  // group inside a normal module: subdir is flattened onto the module
+  assert.strictEqual(testModule.profile.get(), 'profile-get');
+});
+
 test('Self Reference', async () => {
   const logs = [];
   const mockedConsole = { log: (x) => logs.push(x) };
