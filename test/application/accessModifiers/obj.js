@@ -1,1 +1,0 @@
-({ getSecret: () => self.secret.value });

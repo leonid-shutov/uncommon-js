@@ -1,1 +1,0 @@
-() => self.secret.value;

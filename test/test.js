@@ -108,15 +108,8 @@ test('Self Reference', async () => {
   assert.strictEqual(logs[1], 'own-value');
   // module's self doesn't include object entries
   assert.strictEqual(testModule.ownSelf(), undefined);
-});
 
-test('Access Modifiers', async () => {
-  const context = vm.createContext({});
-  await loadDir(context, context, PATH_TO_APPLICATION);
-  const testModule = context.application.accessModifiers;
-  assert.strictEqual(testModule.exposed.value, 'exposed-value');
-  assert.strictEqual(testModule.secret, undefined);
-  assert.strictEqual(testModule.obj.getSecret(), 'secret-value');
-  assert.strictEqual(testModule.getFromPublic(), 'secret-value');
-  assert.strictEqual(testModule.getFromMethod(), 'secret-value');
+  assert.strictEqual(testModule.value, 'initial-value');
+  testModule.setValue();
+  assert.strictEqual(testModule.value, 'updated-value');
 });

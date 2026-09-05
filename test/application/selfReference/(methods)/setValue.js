@@ -1,0 +1,3 @@
+() => {
+  self.value = 'updated-value';
+};
