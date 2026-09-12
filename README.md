@@ -47,15 +47,15 @@ src/
 
 ```js
 // index.js
-const { loadApplication } = require('@leonid-shutov/uncommonjs');
+const { loadTree } = require('@leonid-shutov/uncommonjs');
 
-const app = await loadApplication({ console }, { rootDir: __dirname });
+const app = await loadTree({ console }, { rootDir: __dirname });
 await app.book.create('DUNE');
 ```
 
 The first argument is the sandbox — the globals you want the app to see, like `console`, a
 database handle, or a UI toolkit. You get it back, populated. `src` is the default tree;
-override it with `applicationPath`.
+override it with `treePath`.
 
 ## The one rule
 
@@ -85,7 +85,7 @@ parentheses: a bare `{ ... }` is a block, and blocks export nothing.
 | `npm.*`      | every dependency from your `package.json` — `npm.pg`, `npm['@mtcute/bun']` |
 | `self`       | the module the file belongs to; writes through it land on the module       |
 | `__rootDir`  | the resolved application root                                              |
-| your sandbox | whatever you passed to `loadApplication`                                   |
+| your sandbox | whatever you passed to `loadTree`                                   |
 
 ## Conventions
 

@@ -7,7 +7,7 @@ either — they're expected to change.
 ## `npm.*` is loaded eagerly
 
 Every entry in the app's `package.json` `dependencies` is `require`d during
-`loadApplication`, before any app file runs, whether or not the app ever references it
+`loadTree`, before any app file runs, whether or not the app ever references it
 (`lib/deps.js:16-23`).
 
 A package whose import has a side effect demonstrates it — the app below never mentions
@@ -19,16 +19,16 @@ console.log('>>> heavy-pkg side effect ran (opened a DB pool, started a timer, .
 ```
 
 ```
-before loadApplication
+before loadTree
 >>> heavy-pkg side effect ran (opened a DB pool, started a timer, ...)
-after loadApplication
+after loadTree
 ```
 
 Consequences:
 
 - startup pays for every dependency, used or not;
 - packages that connect, spawn, or register on import do so unconditionally;
-- a dependency that fails to resolve throws during `loadApplication`, taking the process
+- a dependency that fails to resolve throws during `loadTree`, taking the process
   down at boot rather than at the point of use. `safeRequire` (`lib/deps.js:6`) catches the
   `require` failure and retries with a dynamic `import()`, but nothing catches that, so it
   escapes as an unhandled `ERR_MODULE_NOT_FOUND`.
