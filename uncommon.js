@@ -1,6 +1,6 @@
 'use strict';
 
-const loader = require('./lib/loader.js');
-const tree = require('./lib/tree.js');
+const { loadFile, loadDir } = require('./lib/loader.js');
+const { loadTree } = require('./lib/tree.js');
 
-module.exports = { ...loader, ...tree };
+module.exports = { loadTree, loadFile, loadDir };
