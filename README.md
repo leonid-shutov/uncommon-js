@@ -85,7 +85,7 @@ parentheses: a bare `{ ... }` is a block, and blocks export nothing.
 | `npm.*`      | every dependency from your `package.json` — `npm.pg`, `npm['@mtcute/bun']` |
 | `self`       | the module the file belongs to; writes through it land on the module       |
 | `__rootDir`  | the resolved application root                                              |
-| your sandbox | whatever you passed to `loadTree`                                   |
+| your sandbox | whatever you passed to `loadTree`                                          |
 
 ## Conventions
 
