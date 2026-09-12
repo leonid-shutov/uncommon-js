@@ -1,15 +1,14 @@
-# uncommon‑js ⚙️
+# uncommon-js ⚙️
 
-**uncommon‑js** — a convention‑over‑configuration module system for Node.js built on V8
-sandboxing (`node:vm`).
+Convention over configuration for JavaScript.
 
-You don't write `require`/`import` in your app files. Instead you lay code out as a directory
-tree under `src/`, and `loadApplication()` walks the tree, runs each file in an isolated VM
-context, and wires everything into a single object graph (the "sandbox") that it returns.
-Shared dependencies, Node builtins, npm packages, and error helpers are injected as globals —
-so app files stay tiny and focused on logic.
+You don't write `require` or `import` in your files. You lay code out as a directory tree,
+and the shape of that tree _is_ the wiring: the loader walks it, runs every file in its own
+`node:vm` context, and hands back a single object graph. Builtins, npm packages and your own
+shared helpers arrive as globals, so files stay small and say nothing about where their
+dependencies live.
 
-The library has no runtime dependencies.
+Runs on Node, Bun and Deno. No runtime dependencies.
 
 ## Install
 
@@ -17,20 +16,20 @@ The library has no runtime dependencies.
 npm install @leonid-shutov/uncommonjs
 ```
 
-## Quick start
+## The idea
 
 ```
 src/
   (common)/
-    logger.js          # shared with every sibling, loaded first
+    logger.js        # loaded first, shared with every sibling
   book/
-    book.js            # merges into the `book` module itself
-    create.js          # becomes app.book.create
+    book.js          # merges into the book module itself
+    create.js        # becomes app.book.create
 ```
 
 ```js
 // src/(common)/logger.js
-({ info: (m) => console.log(`[app] ${m}`) });
+({ info: (message) => console.log(`[app] ${message}`) });
 ```
 
 ```js
@@ -41,8 +40,8 @@ src/
 ```js
 // src/book/create.js
 (name) => {
-  logger.info('inserting'); // (common) helper — no import
-  return node.crypto.randomUUID(); // node builtin — no import
+  logger.info(`inserting into ${self.table}`); // the (common) helper, and the module itself
+  return node.crypto.randomUUID(); // a node builtin, no import
 };
 ```
 
@@ -54,97 +53,74 @@ const app = await loadApplication({ console }, { rootDir: __dirname });
 await app.book.create('DUNE');
 ```
 
-## The one authoring rule
+The first argument is the sandbox — the globals you want the app to see, like `console`, a
+database handle, or a UI toolkit. You get it back, populated. `src` is the default tree;
+override it with `applicationPath`.
 
-**Every `.js` app file is a single parenthesized expression that evaluates to its export.**
-The file is executed in a VM and its last expression becomes the module's value.
+## The one rule
+
+**A file's last expression is its export.**
 
 ```js
-// object module
 ({ title: 'Book', create: (name) => db.insert(name) });
 ```
 
-```js
-// function module
-async (code) => (await db.query('SELECT * FROM book WHERE code = $1', [code])).rows[0] ?? null;
-```
-
-Don't use `module.exports`, `export`, or a bare `{ ... }` block — wrap objects in parentheses
-(a bare `{ ... }` is parsed as a block and exports nothing).
-
-## Bootstrapping
+Anything above that last expression is yours — comments, JSDoc, whatever constants and
+helpers the file needs. They stay private to it.
 
 ```js
-loadApplication(sandbox = {}, { rootDir = process.cwd(), applicationPath = 'src' })
+const sql = 'select * from book where code = $1';
+
+async (code) => (await db.query(sql, [code])).rows[0] ?? null;
 ```
 
-Returns the populated sandbox object. `sandbox` holds the globals you want to inject
-(e.g. `console`, `process`, or your own UI/db handles).
+No `module.exports`, no `export`. The only thing to remember is to wrap a returned object in
+parentheses: a bare `{ ... }` is a block, and blocks export nothing.
 
-## Injected globals
+## What every file can see
 
-Available inside every file, no imports required:
+|              |                                                                            |
+| ------------ | -------------------------------------------------------------------------- |
+| `node.*`     | every Node builtin — `node.fs`, `node.path`, `node.crypto`, …              |
+| `npm.*`      | every dependency from your `package.json` — `npm.pg`, `npm['@mtcute/bun']` |
+| `self`       | the module the file belongs to; writes through it land on the module       |
+| `__rootDir`  | the resolved application root                                              |
+| errors       | `DomainError`, `NotFoundError` and friends (below)                         |
+| your sandbox | whatever you passed to `loadApplication`                                   |
 
-| Global        | What it is                                                                                                                                                            |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `node.*`      | Every Node builtin: `node.fs`, `node.path`, `node.crypto`, `node.timers`, …                                                                                           |
-| `npm.*`       | Every dependency in your app's `package.json`, keyed by package name: `npm['@mtcute/bun']`, `npm.neovim`                                                              |
-| error classes | `DomainError`, `NotFoundError`, `AlreadyExistsError`, `ConstraintViolationError`, `AuthorizationError`, `UnexpectedError`, and `createDomainError` |
-| `__rootDir`   | The resolved application root                                                                                                                                         |
-| your sandbox  | Anything you passed as the first argument to `loadApplication`                                                                                                        |
-| `self`        | The current module's own members (see below)                                                                                                                          |
+## Conventions
 
-## Directory & filename conventions
+|                   |                                                                                          |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| `book/`           | a submodule — `app.book`                                                                 |
+| `book/book.js`    | named after its own directory, so it merges _into_ the module instead of nesting         |
+| `1-config/`       | a numeric prefix sets load order and is stripped from the key — `app.config`             |
+| `(common)/`       | loaded first, into the **parent** context, shared with every sibling                     |
+| `(getters)/`      | each file is `() => value` and becomes a lazy property, evaluated on first read          |
+| `(anythingElse)/` | grouping only, fully transparent: files _and_ subdirectories load as if it weren't there |
 
-The tree shape defines the module graph:
-
-| Pattern                       | Behavior                                                                                                                |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `N-name` (e.g. `1-messenger`) | Sets load order; the numeric prefix is **stripped** from the key (`app.messenger`).                                     |
-| `foo/foo.js`                  | A file named after its directory **merges into the module itself** instead of nesting.                                  |
-| `(common)/` _(reserved)_      | Loaded **first**, into the **parent** context — shared with every sibling module.                                       |
-| `(getters)/` _(reserved)_     | Each file is `() => value` and becomes a **lazy getter** (runs on first access).                                        |
-| `(anythingElse)/`             | Any other parenthesized name is **grouping only** and fully transparent; its files _and_ subdirectories load in flat, as if they lived in the parent. `(methods)`, `(handlers)`, etc. are not special. |
-| plain-named dir               | Becomes a nested submodule (`user/profile/` → `app.user.profile`).                                                      |
-
-Only `(common)` and `(getters)` are reserved.
-
-### `self`
-
-`self` lets a file reach its module's other members without imports:
-
-```js
-// book/(methods)/report.js
-() => {
-  console.log(self.table); // from book/book.js (merged into the module)
-  console.log(self.create.name); // sibling file book/create.js
-};
-```
-
-Writes go through too — `self.prop = 2` sets `prop` on the module itself.
-
-Function modules see the whole module through `self`; object modules get their own `self`
-scope.
+Only `(common)` and `(getters)` mean anything to the loader. `(methods)`, `(public)`,
+`(private)` and the rest are there for you.
 
 ## Errors
 
-- `DomainError` — base class carrying a `.code`.
-- `createDomainError(name, { message, code, parent })` — factory for your own error classes.
-- Built-ins: `UnexpectedError`, `NotFoundError`, `AlreadyExistsError`,
-  `ConstraintViolationError`, `AuthorizationError`.
-- `.from(entity, options)` helpers auto-generate message and code:
-  `NotFoundError.from('book')` → code `BOOK_NOT_FOUND`;
-  `AlreadyExistsError.from('book')` → code `BOOK_ALREADY_EXISTS`. Override with
-  `{ code, meta, cause }`.
+`DomainError` is the base class and carries a `.code`. Shipped: `UnexpectedError`,
+`NotFoundError`, `AlreadyExistsError`, `ConstraintViolationError`, `AuthorizationError`.
 
-## API
+```js
+throw NotFoundError.from('book'); // "book not found", code BOOK_NOT_FOUND
+```
 
-Everything is re-exported from the package entry point (`uncommon.js`):
+Build your own with `createDomainError(name, { message, code, parent })`.
 
-- **Loader** — `loadFile`, `loadDir`
-- **Application** — `loadApplication`
-- **Errors** — `DomainError`, `createDomainError`, `UnexpectedError`,
-  `NotFoundError`, `AlreadyExistsError`, `ConstraintViolationError`, `AuthorizationError`
+## In the wild
+
+[tuigram](https://github.com/leonid-shutov/tuigram), a terminal Telegram client — 180 files
+under `src/`, not one import among them.
+
+## Prior art
+
+Inspired by Metarhia's [Impress](https://github.com/metarhia/impress)
 
 ## License
 
