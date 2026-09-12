@@ -4,7 +4,7 @@ description: >-
   Author and structure Node.js apps built on @leonid-shutov/uncommonjs (this repo, and
   consumers like tuigram). Use when creating or editing files under an app's src/ tree,
   wiring modules, using the injected node.*/npm.* globals or self,
-  the (common)/(getters) directories, domain errors, or the REST layer. Covers the
+  the (common)/(getters) directories, or domain errors. Covers the
   file-as-expression authoring convention and the directory-loading rules.
 ---
 
@@ -14,10 +14,10 @@ description: >-
 built on V8 sandboxing** (`node:vm`). You don't write `require`/`import` in your app files.
 Instead you lay code out as a directory tree under `src/`, and `loadApplication()` walks the
 tree, runs each file in an isolated VM context, and wires everything into one object graph
-(the "sandbox") that it returns. The library's `main` is `uncommon.js`; its only runtime
-dependency is `metaschema` (used by the REST layer).
+(the "sandbox") that it returns. The library's `main` is `uncommon.js`; it has no
+runtime dependencies.
 
-Everything exported by the library — loader, application, REST, and error helpers — is
+Everything exported by the library — loader, application, and error helpers — is
 re-exported from `uncommon.js`.
 
 ## 1. The one authoring rule
@@ -61,8 +61,6 @@ sandbox. Real example from the `tuigram` consumer:
 ```js
 uncommonjs.loadApplication({ tui, process, console }, { rootDir });
 ```
-
-For a REST app use `loadRestApplication` instead (see §6).
 
 ## 3. Globals injected into every file (no imports needed)
 
@@ -131,50 +129,7 @@ Writes through `self` land on the module: `self.prop = 2` sets `prop` on the mod
   `AlreadyExistsError.from('book')` → code `BOOK_ALREADY_EXISTS`. Pass `{ code, meta, cause }`
   in `options` to override.
 
-## 6. REST layer (`lib/rest.js`)
-
-```js
-const { loadRestApplication } = require('@leonid-shutov/uncommonjs');
-const router = await loadRestApplication({ console }, { rootDir: __dirname });
-```
-
-`loadRestApplication` runs `loadApplication` first, then builds a router from the modules
-found under `sandbox.api`. Each API file maps route strings to per-method definitions:
-
-```js
-// src/api/books.js
-({
-  '/books/:id': {
-    get: {
-      handler: async ({ path }) => app.book.getByCode(path.id),
-      response: (book) => ({ id: book.id, title: book.name }),
-      status: 200,
-    },
-  },
-  '/books': {
-    post: {
-      body: { code: 'string', name: 'string' },   // metaschema
-      handler: async ({ body }) => app.book.create(body),
-    },
-  },
-})
-```
-
-Definition fields: `handler({ path, query, body, ... })`, `query`/`body` (metaschema schemas
-validated before the handler), `response` (value or `(result) => body`), `status` (number or
-`(result) => number`, default 200). Helpers exported: `validateRequest`, `createHandler`,
-`createRouter`, `getStatus`. Domain errors map to HTTP status via `getStatus`:
-
-| Error | Status |
-|-------|--------|
-| `ValidationError` | 400 |
-| `AuthorizationError` | 401 |
-| `NotFoundError` | 404 |
-| `AlreadyExistsError` | 409 |
-| `ConstraintViolationError` | 422 |
-| anything else | 500 |
-
-## 7. Worked example
+## 6. Worked example
 
 ```
 src/
@@ -214,7 +169,7 @@ Resulting sandbox: `app.book.table`, `app.book.create(...)`, `app.book.count` (g
 `app.logger.info(...)`. `app.book.validate` is **undefined**. `logger`, `node`, `npm` are
 available inside every file.
 
-## 8. Gotchas
+## 7. Gotchas
 
 - Files must be a single **parenthesized** expression (`({...})` or `(...) => ...`). A bare
   `{ ... }` is parsed as a block and exports nothing.
@@ -225,6 +180,6 @@ available inside every file.
 - `(methods)`, `(public)`, `(handlers)`… are just grouping folders; they are transparent to
   both files and subdirectories. Only `(common)` and `(getters)` change loading behavior.
 - Utilities you see in a consumer app's `src/(common)/` (e.g. tuigram's `risk`, `LinkedList`,
-  `Obj`) belong to *that app*, not to uncommon-js. The library ships only the loader, error
-  classes, and REST helpers.
+  `Obj`) belong to *that app*, not to uncommon-js. The library ships only the loader and
+  the error classes.
 ```

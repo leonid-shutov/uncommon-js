@@ -9,8 +9,7 @@ context, and wires everything into a single object graph (the "sandbox") that it
 Shared dependencies, Node builtins, npm packages, and error helpers are injected as globals —
 so app files stay tiny and focused on logic.
 
-The only runtime dependency is [`metaschema`](https://github.com/metarhia/metaschema) (used by
-the optional REST layer).
+The library has no runtime dependencies.
 
 ## Install
 
@@ -138,55 +137,12 @@ scope.
   `AlreadyExistsError.from('book')` → code `BOOK_ALREADY_EXISTS`. Override with
   `{ code, meta, cause }`.
 
-## REST layer
-
-`loadRestApplication(sandbox, options)` runs `loadApplication` first, then builds a router
-from the modules under `sandbox.api`:
-
-```js
-// src/api/books.js
-({
-  '/books/:id': {
-    get: {
-      handler: async ({ path }) => app.book.getByCode(path.id),
-      response: (book) => ({ id: book.id, title: book.name }),
-      status: 200,
-    },
-  },
-  '/books': {
-    post: {
-      body: { code: 'string', name: 'string' }, // metaschema
-      handler: async ({ body }) => app.book.create(body),
-    },
-  },
-});
-```
-
-```js
-const { loadRestApplication } = require('@leonid-shutov/uncommonjs');
-const router = await loadRestApplication({ console }, { rootDir: __dirname });
-```
-
-Definition fields: `handler({ path, query, body, ... })`, `query`/`body` (metaschema schemas
-validated before the handler runs), `response` (a value or `(result) => body`), and `status`
-(a number or `(result) => number`, default `200`). Domain errors map to HTTP status:
-
-| Error                      | Status |
-| -------------------------- | ------ |
-| `ValidationError`          | 400    |
-| `AuthorizationError`       | 401    |
-| `NotFoundError`            | 404    |
-| `AlreadyExistsError`       | 409    |
-| `ConstraintViolationError` | 422    |
-| anything else              | 500    |
-
 ## API
 
 Everything is re-exported from the package entry point (`uncommon.js`):
 
 - **Loader** — `loadFile`, `loadDir`
 - **Application** — `loadApplication`
-- **REST** — `loadRestApplication`
 - **Errors** — `DomainError`, `createDomainError`, `UnexpectedError`,
   `NotFoundError`, `AlreadyExistsError`, `ConstraintViolationError`, `AuthorizationError`
 
