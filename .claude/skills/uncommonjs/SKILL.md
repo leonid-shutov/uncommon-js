@@ -3,7 +3,7 @@ name: uncommonjs
 description: >-
   Author and structure Node.js apps built on @leonid-shutov/uncommonjs (this repo, and
   consumers like tuigram). Use when creating or editing files under an app's src/ tree,
-  wiring modules, writing service entries, using the injected node.*/npm.* globals or self,
+  wiring modules, using the injected node.*/npm.* globals or self,
   the (common)/(getters) directories, domain errors, or the REST layer. Covers the
   file-as-expression authoring convention and the directory-loading rules.
 ---
@@ -72,7 +72,7 @@ For a REST app use `loadRestApplication` instead (see §6).
 |---------------|------------|
 | `node.*`      | Every Node builtin, e.g. `node.fs`, `node.path`, `node.crypto`, `node.timers`, `node.events` |
 | `npm.*`       | Every dependency in your app's `package.json`, keyed by package name: `npm['@mtcute/bun']`, `npm.neovim` |
-| error classes | `DomainError`, `NotFoundError`, `AlreadyExistsError`, `ConstraintViolationError`, `AuthorizationError`, `UnexpectedError`, `createDomainError`, and the `PASS` symbol (see §5) |
+| error classes | `DomainError`, `NotFoundError`, `AlreadyExistsError`, `ConstraintViolationError`, `AuthorizationError`, `UnexpectedError`, and `createDomainError` |
 | `__rootDir`   | The resolved application root |
 | your sandbox  | Anything you passed as the first arg to `loadApplication` (e.g. `console`, `tui`) |
 | `self`        | The current module's own members (see §4) |
@@ -120,54 +120,7 @@ module's `self` for sibling functions.
 
 Writes through `self` land on the module: `self.prop = 2` sets `prop` on the module itself.
 
-## 5. Service entries (auto-wrapped methods)
-
-Any object entry shaped `{ method, description?, expectedErrors? }` is automatically wrapped
-into a callable (see `lib/service.js`). The wrapper:
-
-1. logs `description` (a string, or `(...args) => string` for dynamic text) via
-   `context.logger` or `context.console` — whichever you injected;
-2. runs `method` (sync or async);
-3. on throw, looks up `error.code` in `expectedErrors`:
-   - value is `PASS` → re-throw the original error unchanged;
-   - value is a domain error → throw it with `.cause` set to the original;
-   - no match → throw an `UnexpectedError` (with `.cause` set).
-
-```js
-({
-  create: {
-    description: 'Creating a book',
-    method: repository.book.create,
-    expectedErrors: {
-      BOOK_ALREADY_EXISTS: PASS, // let the caller see the raw domain error
-    },
-  },
-  getByCode: {
-    description: (code) => `Getting book ${code}`,
-    method: async (code) => {
-      const book = await repository.book.getByCode(code);
-      if (book === null) throw NotFoundError.from('book', { meta: { code } });
-      return book;
-    },
-    expectedErrors: { BOOK_NOT_FOUND: PASS },
-  },
-})
-```
-
-A common pattern is a lower repository layer that maps driver error codes to domain errors:
-
-```js
-({
-  create: {
-    method: ({ code, name }) => db.pg.query('INSERT INTO "Book"(code,name) VALUES($1,$2)', [code, name]),
-    expectedErrors: {
-      23505: AlreadyExistsError.from('book'), // Postgres unique-violation → domain error
-    },
-  },
-})
-```
-
-## 6. Errors (`lib/errors.js`)
+## 5. Errors (`lib/errors.js`)
 
 - `DomainError` — base class; carries a `.code`.
 - `createDomainError(name, { message, code, parent })` — factory for your own error classes.
@@ -177,9 +130,8 @@ A common pattern is a lower repository layer that maps driver error codes to dom
   `NotFoundError.from('book')` → message `book not found`, code `BOOK_NOT_FOUND`;
   `AlreadyExistsError.from('book')` → code `BOOK_ALREADY_EXISTS`. Pass `{ code, meta, cause }`
   in `options` to override.
-- `PASS` — a symbol used in `expectedErrors` to re-throw the original error untouched.
 
-## 7. REST layer (`lib/rest.js`)
+## 6. REST layer (`lib/rest.js`)
 
 ```js
 const { loadRestApplication } = require('@leonid-shutov/uncommonjs');
@@ -203,7 +155,6 @@ found under `sandbox.api`. Each API file maps route strings to per-method defini
     post: {
       body: { code: 'string', name: 'string' },   // metaschema
       handler: async ({ body }) => app.book.create(body),
-      expectedErrors: { BOOK_ALREADY_EXISTS: PASS },
     },
   },
 })
@@ -223,7 +174,7 @@ validated before the handler), `response` (value or `(result) => body`), `status
 | `ConstraintViolationError` | 422 |
 | anything else | 500 |
 
-## 8. Worked example
+## 7. Worked example
 
 ```
 src/
@@ -231,7 +182,7 @@ src/
     logger.js            # () => shared, loaded first into the parent context
   book/
     book.js              # merges into the `book` module itself
-    create.js            # app.book.create  (service entry)
+    create.js            # app.book.create
     (common)/
       validate.js        # bare name inside book; NOT on app.book
     (getters)/
@@ -246,14 +197,11 @@ src/
 ({ table: 'book' })
 
 // src/book/create.js
-({
-  description: (b) => `Creating ${b.name}`,
-  method: (b) => {
-    if (!validate(b)) throw new Error('invalid');        // book/(common) helper
-    logger.info('inserting');                             // src/(common) helper, no import
-    return node.crypto.randomUUID();                      // node builtin, no import
-  },
-})
+(b) => {
+  if (!validate(b)) throw new Error('invalid');          // book/(common) helper
+  logger.info('inserting');                              // src/(common) helper, no import
+  return node.crypto.randomUUID();                       // node builtin, no import
+}
 
 // src/book/(common)/validate.js
 (b) => typeof b?.name === 'string'
@@ -266,7 +214,7 @@ Resulting sandbox: `app.book.table`, `app.book.create(...)`, `app.book.count` (g
 `app.logger.info(...)`. `app.book.validate` is **undefined**. `logger`, `node`, `npm` are
 available inside every file.
 
-## 9. Gotchas
+## 8. Gotchas
 
 - Files must be a single **parenthesized** expression (`({...})` or `(...) => ...`). A bare
   `{ ... }` is parsed as a block and exports nothing.

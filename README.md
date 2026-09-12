@@ -31,18 +31,20 @@ src/
 
 ```js
 // src/(common)/logger.js
-({ info: (m) => console.log(`[app] ${m}`) })(
-  // src/book/book.js
-  { table: 'book' },
-)(
-  // src/book/create.js
-  {
-    method: (name) => {
-      logger.info('inserting'); // (common) helper — no import
-      return node.crypto.randomUUID(); // node builtin — no import
-    },
-  },
-);
+({ info: (m) => console.log(`[app] ${m}`) });
+```
+
+```js
+// src/book/book.js
+({ table: 'book' });
+```
+
+```js
+// src/book/create.js
+(name) => {
+  logger.info('inserting'); // (common) helper — no import
+  return node.crypto.randomUUID(); // node builtin — no import
+};
 ```
 
 ```js
@@ -88,7 +90,7 @@ Available inside every file, no imports required:
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `node.*`      | Every Node builtin: `node.fs`, `node.path`, `node.crypto`, `node.timers`, …                                                                                           |
 | `npm.*`       | Every dependency in your app's `package.json`, keyed by package name: `npm['@mtcute/bun']`, `npm.neovim`                                                              |
-| error classes | `DomainError`, `NotFoundError`, `AlreadyExistsError`, `ConstraintViolationError`, `AuthorizationError`, `UnexpectedError`, `createDomainError`, and the `PASS` symbol |
+| error classes | `DomainError`, `NotFoundError`, `AlreadyExistsError`, `ConstraintViolationError`, `AuthorizationError`, `UnexpectedError`, and `createDomainError` |
 | `__rootDir`   | The resolved application root                                                                                                                                         |
 | your sandbox  | Anything you passed as the first argument to `loadApplication`                                                                                                        |
 | `self`        | The current module's own members (see below)                                                                                                                          |
@@ -125,53 +127,6 @@ Writes go through too — `self.prop = 2` sets `prop` on the module itself.
 Function modules see the whole module through `self`; object modules get their own `self`
 scope.
 
-## Service entries
-
-Any object entry shaped `{ method, description?, expectedErrors? }` is automatically wrapped
-into a callable that logs, runs the method (sync or async), and maps thrown errors:
-
-```js
-({
-  create: {
-    description: 'Creating a book',
-    method: repository.book.create,
-    expectedErrors: {
-      BOOK_ALREADY_EXISTS: PASS, // re-throw the original error unchanged
-    },
-  },
-  getByCode: {
-    description: (code) => `Getting book ${code}`,
-    method: async (code) => {
-      const book = await repository.book.getByCode(code);
-      if (book === null) throw NotFoundError.from('book', { meta: { code } });
-      return book;
-    },
-    expectedErrors: { BOOK_NOT_FOUND: PASS },
-  },
-});
-```
-
-On throw, `error.code` is looked up in `expectedErrors`:
-
-- value is `PASS` → the original error is re-thrown untouched;
-- value is a domain error → it is thrown with `.cause` set to the original;
-- no match → an `UnexpectedError` is thrown (with `.cause` set).
-
-`description` (a string or `(...args) => string`) is logged via the `logger` or `console` you
-injected. A lower repository layer commonly maps driver codes to domain errors:
-
-```js
-({
-  create: {
-    method: ({ code, name }) => db.pg.query('INSERT INTO "Book"(code,name) VALUES($1,$2)', [code, name]),
-    expectedErrors: {
-      23505: AlreadyExistsError.from('book'), // Postgres unique-violation
-    },
-  },
-  getByCode: async (code) => (await db.pg.query('SELECT * FROM "Book" WHERE code = $1', [code])).rows[0] ?? null,
-});
-```
-
 ## Errors
 
 - `DomainError` — base class carrying a `.code`.
@@ -182,7 +137,6 @@ injected. A lower repository layer commonly maps driver codes to domain errors:
   `NotFoundError.from('book')` → code `BOOK_NOT_FOUND`;
   `AlreadyExistsError.from('book')` → code `BOOK_ALREADY_EXISTS`. Override with
   `{ code, meta, cause }`.
-- `PASS` — symbol used in `expectedErrors` to re-throw the original error.
 
 ## REST layer
 
@@ -203,7 +157,6 @@ from the modules under `sandbox.api`:
     post: {
       body: { code: 'string', name: 'string' }, // metaschema
       handler: async ({ body }) => app.book.create(body),
-      expectedErrors: { BOOK_ALREADY_EXISTS: PASS },
     },
   },
 });
@@ -234,7 +187,7 @@ Everything is re-exported from the package entry point (`uncommon.js`):
 - **Loader** — `loadFile`, `loadDir`
 - **Application** — `loadApplication`
 - **REST** — `loadRestApplication`
-- **Errors** — `PASS`, `DomainError`, `createDomainError`, `UnexpectedError`,
+- **Errors** — `DomainError`, `createDomainError`, `UnexpectedError`,
   `NotFoundError`, `AlreadyExistsError`, `ConstraintViolationError`, `AuthorizationError`
 
 ## License

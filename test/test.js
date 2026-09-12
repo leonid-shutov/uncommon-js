@@ -21,44 +21,6 @@ test('Methods Directory', async () => {
   assert.strictEqual(logs[2], 'baz');
 });
 
-test('Service Entry', async (t) => {
-  await t.test('Method', async () => {
-    const logs = [];
-    const console = { info: (x) => logs.push(x) };
-    const context = vm.createContext({ console });
-    await loadDir(context, context, PATH_TO_APPLICATION);
-    const testModule = context.application.serviceEntry.module;
-    const log = Symbol();
-    testModule.log(log);
-    assert.strictEqual(logs[0], 'Testing Service Entry');
-    assert.strictEqual(logs[1], log);
-  });
-
-  await t.test('Expected Error', async () => {
-    const context = vm.createContext({});
-    await loadDir(context, context, PATH_TO_APPLICATION);
-    const testModule = context.application.serviceEntry.module;
-    try {
-      testModule.handleExpectedError();
-    } catch (error) {
-      assert.strictEqual(error.message, 'Handled error');
-      assert.strictEqual(error.cause.code, 404);
-    }
-  });
-
-  await t.test('Unexpected Error', async () => {
-    const context = vm.createContext({});
-    await loadDir(context, context, PATH_TO_APPLICATION);
-    const testModule = context.application.serviceEntry.module;
-    try {
-      testModule.handleUnexpectedError();
-    } catch (error) {
-      assert.strictEqual(error.message, 'Unexpected error');
-      assert.strictEqual(error.cause.code, 'UNEXPECTED_CODE');
-    }
-  });
-});
-
 test('Getter', async () => {
   const logs = [];
   const mockedConsole = { log: (x) => logs.push(x) };
