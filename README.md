@@ -85,7 +85,6 @@ parentheses: a bare `{ ... }` is a block, and blocks export nothing.
 | `npm.*`      | every dependency from your `package.json` — `npm.pg`, `npm['@mtcute/bun']` |
 | `self`       | the module the file belongs to; writes through it land on the module       |
 | `__rootDir`  | the resolved application root                                              |
-| errors       | `DomainError`, `NotFoundError` and friends (below)                         |
 | your sandbox | whatever you passed to `loadApplication`                                   |
 
 ## Conventions
@@ -101,17 +100,6 @@ parentheses: a bare `{ ... }` is a block, and blocks export nothing.
 
 Only `(common)` and `(getters)` mean anything to the loader. `(methods)`, `(public)`,
 `(private)` and the rest are there for you.
-
-## Errors
-
-`DomainError` is the base class and carries a `.code`. Shipped: `UnexpectedError`,
-`NotFoundError`, `AlreadyExistsError`, `ConstraintViolationError`, `AuthorizationError`.
-
-```js
-throw NotFoundError.from('book'); // "book not found", code BOOK_NOT_FOUND
-```
-
-Build your own with `createDomainError(name, { message, code, parent })`.
 
 ## In the wild
 
