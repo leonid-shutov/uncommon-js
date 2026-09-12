@@ -19,4 +19,10 @@ module.exports = [
       },
     },
   },
+  {
+    files: ['test/application/**/*.js'],
+    rules: {
+      'no-undef': 'off',
+    },
+  },
 ];

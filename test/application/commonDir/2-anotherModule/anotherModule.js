@@ -2,7 +2,7 @@
   method: () => {
     try {
       console.log(foo);
-    } catch (error) {
+    } catch {
       console.log('foo is not defined');
     }
 
