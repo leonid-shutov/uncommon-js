@@ -5,6 +5,10 @@
   "license": "MIT",
   "homepage": "https://github.com/leonid-shutov/uncommonjs#readme",
   "main": "uncommon.js",
+  "files": [
+    "uncommon.js",
+    "lib"
+  ],
   "scripts": {
     "lint": "eslint .",
     "fmt": "prettier --write ."
