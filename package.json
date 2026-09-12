@@ -33,7 +33,8 @@
   "scripts": {
     "test": "node --test test/test.js",
     "lint": "eslint .",
-    "fmt": "prettier --write ."
+    "fmt": "prettier --write .",
+    "prepublishOnly": "npm run lint && npm test"
   },
   "repository": {
     "type": "git",
