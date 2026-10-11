@@ -1,6 +1,6 @@
 {
   "name": "@leonid-shutov/uncommonjs",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Convention over configuration for JavaScript",
   "keywords": [
     "convention-over-configuration",
