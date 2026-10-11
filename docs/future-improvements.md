@@ -39,28 +39,7 @@ That alone restores both the name and the correct line:
 undefinedThing.boom();
 ```
 
-## 2. Deprecation warnings on every startup
-
-Building the builtin table eagerly (`lib/deps.js:25-34`) touches deprecated and experimental
-modules, so a hello-world application prints five warnings on Node and eight on Deno before
-any user code runs:
-
-```
-(node:135821) [DEP0192] DeprecationWarning: The _tls_common module is deprecated...
-(node:135821) [DEP0040] DeprecationWarning: The `punycode` module is deprecated...
-(node:135821) ExperimentalWarning: WASI is an experimental feature...
-```
-
-Nothing is broken, but it is the first thing a new user sees.
-
-### Planned
-
-The filter and laziness already described under
-[`node.*` contains stray keys](./known-limitations.md#node-contains-stray-keys). Filtering
-`_`-prefixed entries is enough to silence most of it; making `node.*` lazy silences the rest,
-since nothing would touch `punycode` or `sys` unless an application asked for them.
-
-## 3. Dependency failures point at the library, not the application
+## 2. Dependency failures point at the library, not the application
 
 A package listed in the application's `package.json` but not installed fails inside
 `lib/deps.js`, and the message names this library's path rather than anything the user wrote:
@@ -71,11 +50,12 @@ Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'heavy-pkg'
 ```
 
 Combined with item 1, neither of the two most common failures points at the user's code.
-Resolving through `rootDir` (see
-[`npm.*` is loaded eagerly](./known-limitations.md#npm-is-loaded-eagerly)) and deferring the
-failure to first use fixes the attribution along with the eagerness.
+Packages already resolve through `rootDir`, but a name that does not resolve at all falls back
+to an `import()` from this library (see
+[ESM dependencies are loaded eagerly](./known-limitations.md#esm-dependencies-are-loaded-eagerly)).
+Throwing an error that names the package and `rootDir` there would fix the attribution.
 
-## 4. Missing configuration is reported as a raw filesystem error
+## 3. Missing configuration is reported as a raw filesystem error
 
 Two setup mistakes surface as unhandled low-level errors rather than as guidance:
 
@@ -88,27 +68,27 @@ That `loadTree` requires a `package.json` at `rootDir` is undocumented, and the 
 default is easy to miss. Both deserve a thrown error naming the option that would fix them
 (`rootDir`, `treePath`).
 
-## 5. No published types
+## 4. No published types
 
 `typescript` and `@types/node` are development dependencies, but there is no `tsconfig.json`,
 no `.d.ts`, and no `types` field in `package.json`, so editors give consumers nothing for
 `loadTree`'s options object. Either ship hand-written declarations for the three exported
 functions and point `types` at them, or drop the two dependencies.
 
-## 6. No continuous integration
+## 5. No continuous integration
 
 `npm test` and `npm run lint` are not run anywhere on push. The `engines` floor
 (`node >= 20`) is likewise a claim rather than a tested guarantee — the suite has only been
 exercised on Node 26, and the Bun and Deno support the README advertises is not covered
 either. A matrix across the three runtimes would turn all of it into something verified.
 
-## 7. README does not link this directory
+## 6. README does not link this directory
 
 Neither this file nor the known limitations are reachable from the README, so a reader on
-npm never learns about the eager `npm.*` loading until a dependency's import side effect
+npm never learns that ESM dependencies load eagerly until one's import side effect
 surprises them. A short "Caveats" section linking both would fix it.
 
-## 8. Bare `node --test` collects fixtures
+## 7. Bare `node --test` collects fixtures
 
 The `test` script pins the runner to `test/test.js`, but a plain `node --test` still treats
 the 17 fixture files under `test/application/` as test files. They pass trivially and inflate

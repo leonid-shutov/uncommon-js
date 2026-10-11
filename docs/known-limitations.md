@@ -4,67 +4,47 @@ Current behavior that is not design intent. Both items below concern the injecte
 and `npm.*` globals, which are built by [`lib/deps.js`](../lib/deps.js). Don't build on
 either — they're expected to change.
 
-## `npm.*` is loaded eagerly
+## ESM dependencies are loaded eagerly
 
-Every entry in the app's `package.json` `dependencies` is `require`d during
-`loadTree`, before any app file runs, whether or not the app ever references it
-(`lib/deps.js:16-23`).
+`npm.*` is built during `loadTree` (`lib/deps.js`). A CommonJS package is a getter that
+`require`s it on first read, so an unused one is never loaded and its import side effects fire
+only on use. An ES module cannot be loaded that way: `require()` of ESM throws when the module
+uses top-level await, and `import()` is asynchronous, so a getter cannot wait for it. ES modules
+are therefore still imported before any app file runs, whether or not the app references them.
 
-A package whose import has a side effect demonstrates it — the app below never mentions
-`heavy-pkg`:
+Consequences, for ESM dependencies only:
 
-```js
-// node_modules/heavy-pkg/index.js
-console.log('>>> heavy-pkg side effect ran (opened a DB pool, started a timer, ...)');
-```
-
-```
-before loadTree
->>> heavy-pkg side effect ran (opened a DB pool, started a timer, ...)
-after loadTree
-```
-
-Consequences:
-
-- startup pays for every dependency, used or not;
+- startup pays for them, used or not;
 - packages that connect, spawn, or register on import do so unconditionally;
-- a dependency that fails to resolve throws during `loadTree`, taking the process
-  down at boot rather than at the point of use. `safeRequire` (`lib/deps.js:6`) catches the
-  `require` failure and retries with a dynamic `import()`, but nothing catches that, so it
-  escapes as an unhandled `ERR_MODULE_NOT_FOUND`.
+- one that fails to resolve throws during `loadTree`, taking the process down at boot rather
+  than at the point of use.
 
-Resolution is also relative to the library's own location rather than `rootDir`. A normal
-`npm install` works, because the library sits inside the app's `node_modules`, but an
-`npm link`ed or workspace-symlinked checkout resolves to the real path and cannot see the
-app's packages:
+Packages are resolved from `rootDir`, so an `npm link`ed or workspace-symlinked checkout of
+this library still sees the app's packages, with one exception: a package whose `exports`
+offer only an `import` condition is invisible to `require.resolve`, and is imported by name
+from this library's location instead. Under a linked checkout that fails:
 
 ```
-Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'heavy-pkg'
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'esm-only-pkg'
     imported from .../uncommon-js/lib/deps.js
 ```
 
+A dependency missing from `node_modules` altogether fails the same way, naming this library.
+
 ### Planned
 
-Make `npm` lazy — a `Proxy` (or getters) that resolves a package on first property access —
-and resolve via `require.resolve(name, { paths: [rootDir] })`. Then unused packages are
-never loaded, import side effects fire only on use, and a missing package throws where it
-is used, with a message naming it.
+Make `loadTree` itself able to wait for a module on first use — for instance by letting an
+app file's top-level value be awaited when it reads an ESM dependency — so ES modules can be
+deferred too.
 
-## `node.*` contains stray keys
+## `node.*` contains slash-named duplicates
 
-The builtin table is built from `builtinModules` without filtering (`lib/deps.js:25-34`),
-so it carries three kinds of noise.
+`node.*` is built from `builtinModules` without filtering (`lib/deps.js`). Each entry is a
+getter that requires the builtin on first read, so deprecated and experimental ones (`sys`,
+`punycode`, `_tls_common`, `wasi`) only warn if an app touches them, and a builtin that fails to
+load reads as `null`.
 
-**A literal `undefined` key.** Failed lookups `return []` — an empty array where a
-`[key, value]` pair is expected — and `Object.fromEntries` reads `[][0]` as the key:
-
-```js
-const { node } = await loadModules(rootDir);
-node.undefined; // => undefined, but the key is really there
-Object.keys(node).includes('undefined'); // => true
-```
-
-**Slash-named duplicates.** `builtinModules` lists both spellings, so each appears twice:
+`builtinModules` lists both spellings, so each of these appears twice:
 
 ```js
 node['fs/promises'] === node.fs.promises; // => true
@@ -73,22 +53,8 @@ node['fs/promises'] === node.fs.promises; // => true
 Affects `assert/strict`, `dns/promises`, `fs/promises`, `inspector/promises`, `path/posix`,
 `path/win32`, `readline/promises`, `stream/consumers`, `stream/promises`, `stream/web`,
 `timers/promises`, and `util/types`. **Prefer the dotted form** (`node.fs.promises`) — the
-slash spellings may be dropped.
-
-**Deprecated and internal builtins.** They are required unconditionally, which is why every
-app prints this at startup:
-
-```
-[DEP0192] The _tls_common module is deprecated. Use `node:tls` instead.
-[DEP0192] The _tls_wrap module is deprecated. Use `node:tls` instead.
-[DEP0040] The `punycode` module is deprecated...
-[DEP0025] sys is deprecated. Use `node:util` instead.
-ExperimentalWarning: WASI is an experimental feature and might change at any time
-```
+slash spellings may be dropped. `_`-prefixed internal builtins are listed as well.
 
 ### Planned
 
-Filter out `_`-prefixed and slash-named entries, and drop failed lookups properly rather
-than emitting an empty pair. Making `node.*` lazy in the same way as `npm.*` would also
-silence the deprecation warnings, since nothing would touch `punycode` or `sys` unless an
-app asked for them.
+Filter out `_`-prefixed and slash-named entries.

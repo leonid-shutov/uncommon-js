@@ -75,3 +75,20 @@ test('Self Reference', async () => {
   testModule.setValue();
   assert.strictEqual(testModule.value, 'updated-value');
 });
+
+test('Dependencies', async () => {
+  const { loadModules } = require('../lib/deps.js');
+  delete globalThis.cjsPkgLoads;
+  const { npm, node } = await loadModules(path.join(__dirname, 'deps'));
+  // CommonJS loads on first read, and only once
+  assert.strictEqual(globalThis.cjsPkgLoads, undefined);
+  assert.strictEqual(npm['cjs-pkg'].name, 'cjs-pkg');
+  assert.strictEqual(npm['cjs-pkg'].name, 'cjs-pkg');
+  assert.strictEqual(globalThis.cjsPkgLoads, 1);
+  // ESM with top-level await is imported up front, resolved from rootDir
+  assert.strictEqual(npm['esm-tla-pkg'].name, 'esm-tla-pkg');
+  // builtins are lazy too, with no stray `undefined` key
+  assert.strictEqual(typeof Object.getOwnPropertyDescriptor(node, 'fs').get, 'function');
+  assert.strictEqual(node.fs, require('node:fs'));
+  assert.strictEqual(Object.keys(node).includes('undefined'), false);
+});

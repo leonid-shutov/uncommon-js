@@ -1,0 +1,8 @@
+{
+  "name": "deps-fixture",
+  "private": true,
+  "dependencies": {
+    "cjs-pkg": "*",
+    "esm-tla-pkg": "*"
+  }
+}

@@ -79,13 +79,13 @@ parentheses: a bare `{ ... }` is a block, and blocks export nothing.
 
 ## What every file can see
 
-|              |                                                                            |
-| ------------ | -------------------------------------------------------------------------- |
-| `node.*`     | every Node builtin — `node.fs`, `node.path`, `node.crypto`, …              |
-| `npm.*`      | every dependency from your `package.json` — `npm.pg`, `npm['@mtcute/bun']` |
-| `self`       | the module the file belongs to; writes through it land on the module       |
-| `__rootDir`  | the resolved application root                                              |
-| your sandbox | whatever you passed to `loadTree`                                          |
+|              |                                                                                                             |
+| ------------ | ----------------------------------------------------------------------------------------------------------- |
+| `node.*`     | every Node builtin — `node.fs`, `node.path`, `node.crypto`, … — loaded on first use                         |
+| `npm.*`      | every dependency from your `package.json` — `npm.pg`, `npm['@mtcute/bun']`; CommonJS ones load on first use |
+| `self`       | the module the file belongs to; writes through it land on the module                                        |
+| `__rootDir`  | the resolved application root                                                                               |
+| your sandbox | whatever you passed to `loadTree`                                                                           |
 
 ## Conventions
 
