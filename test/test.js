@@ -58,6 +58,17 @@ test('Group Directory', async () => {
   assert.strictEqual(testModule.profile.get(), 'profile-get');
 });
 
+test('Parenthesized Directories', async () => {
+  const context = vm.createContext({});
+  await loadDir(context, context, PATH_TO_APPLICATION);
+  const { methodsDir, gettersFile, groupDir, commonDir } = context.application;
+  // grouping and reserved dirs leave nothing behind on the module they load into
+  assert.deepStrictEqual(Object.keys(methodsDir), ['method', 'anotherModule', 'foo']);
+  assert.deepStrictEqual(Object.keys(gettersFile), ['getter', 'module']);
+  assert.deepStrictEqual(Object.keys(groupDir), ['profile', 'module']);
+  assert.deepStrictEqual(Object.keys(commonDir), ['module', 'anotherModule']);
+});
+
 test('Self Reference', async () => {
   const logs = [];
   const mockedConsole = { log: (x) => logs.push(x) };
