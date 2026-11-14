@@ -64,7 +64,7 @@ test('Self Reference', async () => {
   const context = vm.createContext({ console: mockedConsole });
   await loadDir(context, context, PATH_TO_APPLICATION);
   const testModule = context.application.selfReference;
-  // files have access to both own and parent entries
+  // in an object-literal file too, self is the module; its own entries are reached through it
   testModule.obj.ownFun();
   assert.strictEqual(logs[0], 'parent-value');
   assert.strictEqual(logs[1], 'own-value');
