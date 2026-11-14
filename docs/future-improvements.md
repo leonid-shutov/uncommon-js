@@ -22,14 +22,14 @@ ReferenceError: undefinedThing is not defined
 This is the most damaging gap for a loader whose whole premise is that files never name each
 other: there is no import graph to trace a stack back through by hand, so a single typo in
 one of a few hundred files gives no clue which file it was in. Line numbers are also off by
-one, because `runInContext` prepends `'use strict';\n` to the source.
+two, because `runInContext` wraps the source in `'use strict';\n{\n` and `\n}`.
 
 ### Planned
 
-Pass the path and compensate for the prepended line:
+Pass the path and compensate for the prepended lines:
 
 ```js
-const script = new vm.Script(code, { filename: filePath, lineOffset: -1 });
+const script = new vm.Script(code, { filename: filePath, lineOffset: -2 });
 ```
 
 That alone restores both the name and the correct line:

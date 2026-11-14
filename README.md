@@ -3,10 +3,10 @@
 Convention over configuration for JavaScript.
 
 You don't write `require` or `import` in your files. You lay code out as a directory tree,
-and the shape of that tree _is_ the wiring: the loader walks it, runs every file in its own
-`node:vm` context, and hands back a single object graph. Builtins, npm packages and your own
-shared helpers arrive as globals, so files stay small and say nothing about where their
-dependencies live.
+and the shape of that tree _is_ the wiring: the loader walks it, runs each module's files in
+a `node:vm` context of its own, and hands back a single object graph. Builtins, npm packages
+and your own shared helpers arrive as globals, so files stay small and say nothing about
+where their dependencies live.
 
 Runs on Node, Bun and Deno. No runtime dependencies.
 
@@ -66,7 +66,8 @@ override it with `treePath`.
 ```
 
 Anything above that last expression is yours — comments, JSDoc, whatever constants and
-helpers the file needs. They stay private to it.
+helpers the file needs. Declared with `const`, `let`, `function` or `class`, they stay
+private to it; a top-level `var` is shared with the rest of the module.
 
 ```js
 const sql = 'select * from book where code = $1';

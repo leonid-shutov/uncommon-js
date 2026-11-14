@@ -1,0 +1,1 @@
+(value) => value instanceof Error;

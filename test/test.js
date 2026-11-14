@@ -76,6 +76,17 @@ test('Self Reference', async () => {
   assert.strictEqual(testModule.value, 'updated-value');
 });
 
+test('Module Realm', async () => {
+  const context = vm.createContext({});
+  await loadDir(context, context, PATH_TO_APPLICATION);
+  const testModule = context.application.moduleRealm;
+  // files of one module share its realm, builtins included
+  assert.strictEqual(testModule.isError(testModule.makeError('boom')), true);
+  // top-level declarations stay private to their file
+  assert.strictEqual(testModule.first(), 'first');
+  assert.strictEqual(testModule.second(), 'second');
+});
+
 test('Dependencies', async () => {
   const { loadModules } = require('../lib/deps.js');
   delete globalThis.cjsPkgLoads;
