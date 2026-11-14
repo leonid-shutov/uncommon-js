@@ -87,6 +87,17 @@ test('Module Realm', async () => {
   assert.strictEqual(testModule.second(), 'second');
 });
 
+test('Error Location', async () => {
+  const context = vm.createContext({});
+  await loadDir(context, context, PATH_TO_APPLICATION);
+  const location = `${path.join(PATH_TO_APPLICATION, 'errorSource', 'throws.js')}:3:`;
+  // errors name the application file and its own line, not the loader's wrapper
+  assert.throws(
+    () => context.application.errorSource.throws(),
+    (error) => error.stack.includes(location),
+  );
+});
+
 test('Dependencies', async () => {
   const { loadModules } = require('../lib/deps.js');
   delete globalThis.cjsPkgLoads;
