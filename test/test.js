@@ -153,6 +153,13 @@ test('Tree Without Manifest', async () => {
   assert.strictEqual(app.module.callGrouped(), 'grouped-global');
 });
 
+test('Root Directory', async () => {
+  const rootDir = path.relative(process.cwd(), PATH_TO_APPLICATION);
+  const app = await loadTree({}, { rootDir, treePath: 'groupDir' });
+  // a relative rootDir reaches files resolved, so it survives a change of directory
+  assert.strictEqual(app.__rootDir, PATH_TO_APPLICATION);
+});
+
 test('Missing Tree', async () => {
   const treePath = path.join(__dirname, 'missing');
   // the error names the options that place the tree
