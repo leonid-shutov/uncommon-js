@@ -39,12 +39,20 @@ no `.d.ts`, and no `types` field in `package.json`, so editors give consumers no
 `loadTree`'s options object. Either ship hand-written declarations for the three exported
 functions and point `types` at them, or drop the two dependencies.
 
-## 4. No continuous integration
+## 4. Bun and Deno are not tested
 
-`npm test` and `npm run lint` are not run anywhere on push. The `engines` floor
-(`node >= 20`) is likewise a claim rather than a tested guarantee — the suite has only been
-exercised on Node 26, and the Bun and Deno support the README advertises is not covered
-either. A matrix across the three runtimes would turn all of it into something verified.
+CI runs the linter on Node 26 and the suite on Node 20, 22, 24 and 26, so the `engines` floor
+(`node >= 20`) is verified. The Bun and Deno support the README advertises is not, and on Bun
+it does not fully hold: `bun test ./test/test.js` fails 2 of the 9 tests on Bun 1.4.3.
+
+- Bun ignores `vm.Script`'s `lineOffset`, so an error names the right file but a line two
+  below the real one.
+- Bun's `require()` loads an ES module even when it uses top-level await, and returns its
+  namespace, so `npm.*` holds `{ default }` instead of the package's export. This one is not
+  Bun's alone: Node does the same for an ES module without top-level await, which the suite
+  does not cover.
+
+Deno has not been tried. A CI job per runtime would turn the claim into something verified.
 
 ## 5. README does not link this directory
 
