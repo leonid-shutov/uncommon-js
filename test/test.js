@@ -31,6 +31,9 @@ test('Getter', async () => {
   assert.strictEqual(testModule.getter, 'getters-file');
   assert.strictEqual(logs.length, 1);
   assert.strictEqual(logs[0], `This shouldn't be logged during loading`);
+  // computed, not cached: every read runs the getter again
+  assert.strictEqual(testModule.getter, 'getters-file');
+  assert.strictEqual(logs.length, 2);
 });
 
 test('Common', async () => {

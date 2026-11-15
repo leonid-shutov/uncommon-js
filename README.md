@@ -96,7 +96,7 @@ parentheses: a bare `{ ... }` is a block, and blocks export nothing.
 | `book/book.js`    | named after its own directory, so it merges _into_ the module instead of nesting         |
 | `1-config/`       | a numeric prefix sets load order and is stripped from the key — `app.config`             |
 | `(common)/`       | loaded first, into the **parent** context, shared with every sibling                     |
-| `(getters)/`      | each file is `() => value` and becomes a lazy property, evaluated on first read          |
+| `(getters)/`      | each file is `() => value` and becomes a computed property, evaluated on every read      |
 | `(anythingElse)/` | grouping only, fully transparent: files _and_ subdirectories load as if it weren't there |
 
 Only `(common)` and `(getters)` mean anything to the loader. `(methods)`, `(public)`,
