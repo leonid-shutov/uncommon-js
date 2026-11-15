@@ -25,7 +25,8 @@
   },
   "files": [
     "uncommon.js",
-    "lib"
+    "lib",
+    "CHANGELOG.md"
   ],
   "engines": {
     "node": ">=20.0.0"
