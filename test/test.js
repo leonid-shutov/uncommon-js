@@ -178,10 +178,10 @@ test('Root Directory', async () => {
 
 test('Missing Tree', async () => {
   const treePath = path.join(__dirname, 'missing');
-  // the error names the options that place the tree
+  // a tree that isn't there fails with Node's own error, which names the absolute path
   await assert.rejects(loadTree({}, { rootDir: __dirname, treePath: 'missing' }), (error) => {
-    assert.strictEqual(error.message, `Cannot read the tree at ${treePath}: set rootDir, or treePath relative to it`);
-    assert.strictEqual(error.cause.code, 'ENOENT');
+    assert.strictEqual(error.code, 'ENOENT');
+    assert.strictEqual(error.path, treePath);
     return true;
   });
 });

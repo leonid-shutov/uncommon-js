@@ -8,6 +8,8 @@
   file there is stripped from its key, so `src/1-start.js` becomes `start` instead of
   `1-start`, and its files load after its directories instead of in alphabetical order
   among them.
+- A tree directory that cannot be read fails with Node's own error, such as `ENOENT` naming
+  its absolute path, instead of one naming `rootDir` and `treePath`.
 
 ### Fixed
 
