@@ -1,0 +1,7 @@
+{
+  "name": "missing-deps-fixture",
+  "private": true,
+  "dependencies": {
+    "missing-pkg": "*"
+  }
+}

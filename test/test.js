@@ -130,3 +130,17 @@ test('Dependencies', async () => {
   assert.strictEqual(node.fs, require('node:fs'));
   assert.strictEqual(Object.keys(node).includes('undefined'), false);
 });
+
+test('Missing Dependency', async () => {
+  const { loadModules } = require('../lib/deps.js');
+  const rootDir = path.join(__dirname, 'missingDeps');
+  // the error names the application's manifest, not this library
+  await assert.rejects(loadModules(rootDir), (error) => {
+    assert.strictEqual(
+      error.message,
+      `Cannot load dependency 'missing-pkg' from ${path.join(rootDir, 'package.json')}`,
+    );
+    assert.match(error.cause.message, /missing-pkg/);
+    return true;
+  });
+});

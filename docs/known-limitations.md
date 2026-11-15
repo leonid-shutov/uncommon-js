@@ -22,14 +22,16 @@ Consequences, for ESM dependencies only:
 Packages are resolved from `rootDir`, so an `npm link`ed or workspace-symlinked checkout of
 this library still sees the app's packages, with one exception: a package whose `exports`
 offer only an `import` condition is invisible to `require.resolve`, and is imported by name
-from this library's location instead. Under a linked checkout that fails:
+from this library's location instead. Under a linked checkout that fails, though the error
+names the application's manifest, with the failed import as its cause:
 
 ```
-Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'esm-only-pkg'
+Error: Cannot load dependency 'esm-only-pkg' from /app/package.json
+  [cause]: Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'esm-only-pkg'
     imported from .../uncommon-js/lib/deps.js
 ```
 
-A dependency missing from `node_modules` altogether fails the same way, naming this library.
+A dependency missing from `node_modules` altogether fails the same way.
 
 ### Planned
 
