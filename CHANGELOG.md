@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** the top of the tree loads like any directory below it. A numeric prefix on a
+  file there is stripped from its key, so `src/1-start.js` becomes `start` instead of
+  `1-start`, and its files load after its directories instead of in alphabetical order
+  among them.
+
 ### Fixed
 
 - A file at the top of the tree that isn't `.js`, such as a `README.md` in `src/`, is skipped

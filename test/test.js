@@ -160,6 +160,15 @@ test('Stray File', async () => {
   assert.strictEqual(app.notes, undefined);
 });
 
+test('Tree Root', async () => {
+  // the root of the tree loads like any directory: numeric prefixes are stripped, and
+  // directories load before files
+  const app = await loadTree({}, { rootDir: __dirname, treePath: 'treeRoot' });
+  assert.strictEqual(app.first, 'first');
+  assert.strictEqual(app['1-first'], undefined);
+  assert.strictEqual(app.a, 'from b');
+});
+
 test('Root Directory', async () => {
   const rootDir = path.relative(process.cwd(), PATH_TO_APPLICATION);
   const app = await loadTree({}, { rootDir, treePath: 'groupDir' });
