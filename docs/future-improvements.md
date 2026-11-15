@@ -43,14 +43,9 @@ functions and point `types` at them, or drop the two dependencies.
 
 CI runs the linter on Node 26 and the suite on Node 20, 22, 24 and 26, so the `engines` floor
 (`node >= 20`) is verified. The Bun and Deno support the README advertises is not, and on Bun
-it does not fully hold: `bun test ./test/test.js` fails 2 of the 9 tests on Bun 1.4.3.
-
-- Bun ignores `vm.Script`'s `lineOffset`, so an error names the right file but a line two
-  below the real one.
-- Bun's `require()` loads an ES module even when it uses top-level await, and returns its
-  namespace, so `npm.*` holds `{ default }` instead of the package's export. This one is not
-  Bun's alone: Node does the same for an ES module without top-level await, which the suite
-  does not cover.
+it does not fully hold: `bun test ./test/test.js` fails 1 of the 9 tests on Bun 1.4.3. Bun
+ignores `vm.Script`'s `lineOffset`, so an error names the right file but a line two below the
+real one.
 
 Deno has not been tried. A CI job per runtime would turn the claim into something verified.
 

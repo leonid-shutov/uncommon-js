@@ -3,6 +3,7 @@
   "private": true,
   "dependencies": {
     "cjs-pkg": "*",
+    "esm-pkg": "*",
     "esm-tla-pkg": "*"
   }
 }

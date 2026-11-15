@@ -121,7 +121,9 @@ test('Dependencies', async () => {
   assert.strictEqual(npm['cjs-pkg'].name, 'cjs-pkg');
   assert.strictEqual(npm['cjs-pkg'].name, 'cjs-pkg');
   assert.strictEqual(globalThis.cjsPkgLoads, 1);
-  // ESM with top-level await is imported up front, resolved from rootDir
+  // ESM is imported up front, resolved from rootDir, and reads as its default export,
+  // with or without top-level await
+  assert.strictEqual(npm['esm-pkg'].name, 'esm-pkg');
   assert.strictEqual(npm['esm-tla-pkg'].name, 'esm-tla-pkg');
   // builtins are lazy too, with no stray `undefined` key
   assert.strictEqual(typeof Object.getOwnPropertyDescriptor(node, 'fs').get, 'function');
