@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-11-15
+
 ### Changed
 
 - **Breaking:** the files of a module share one `node:vm` context instead of getting one each.
@@ -46,4 +48,5 @@
 - If you compared `__rootDir` with a relative `rootDir`, compare it with
   `path.resolve(rootDir)`.
 
-[Unreleased]: https://github.com/leonid-shutov/uncommon-js/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/leonid-shutov/uncommon-js/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/leonid-shutov/uncommon-js/compare/v1.0.2...v2.0.0
