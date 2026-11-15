@@ -5,6 +5,7 @@ const assert = require('node:assert');
 const vm = require('node:vm');
 const path = require('node:path');
 const { loadDir } = require('../lib/loader.js');
+const { loadTree } = require('../lib/tree.js');
 
 const PATH_TO_APPLICATION = path.join(__dirname, 'application');
 
@@ -141,6 +142,23 @@ test('Missing Dependency', async () => {
       `Cannot load dependency 'missing-pkg' from ${path.join(rootDir, 'package.json')}`,
     );
     assert.match(error.cause.message, /missing-pkg/);
+    return true;
+  });
+});
+
+test('Tree Without Manifest', async () => {
+  // test/application has no package.json: it simply has no npm dependencies
+  const app = await loadTree({}, { rootDir: PATH_TO_APPLICATION, treePath: 'groupDir' });
+  assert.deepStrictEqual(Object.keys(app.npm), []);
+  assert.strictEqual(app.module.callGrouped(), 'grouped-global');
+});
+
+test('Missing Tree', async () => {
+  const treePath = path.join(__dirname, 'missing');
+  // the error names the options that place the tree
+  await assert.rejects(loadTree({}, { rootDir: __dirname, treePath: 'missing' }), (error) => {
+    assert.strictEqual(error.message, `Cannot read the tree at ${treePath}: set rootDir, or treePath relative to it`);
+    assert.strictEqual(error.cause.code, 'ENOENT');
     return true;
   });
 });

@@ -54,8 +54,8 @@ await app.book.create('DUNE');
 ```
 
 The first argument is the sandbox — the globals you want the app to see, like `console`, a
-database handle, or a UI toolkit. You get it back, populated. `src` is the default tree;
-override it with `treePath`.
+database handle, or a UI toolkit. You get it back, populated. `rootDir` defaults to the
+working directory, and the tree to `src` inside it; override that with `treePath`.
 
 ## The one rule
 
