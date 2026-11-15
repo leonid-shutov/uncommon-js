@@ -153,6 +153,13 @@ test('Tree Without Manifest', async () => {
   assert.strictEqual(app.module.callGrouped(), 'grouped-global');
 });
 
+test('Stray File', async () => {
+  // a file that isn't .js at the top of the tree is skipped, as it is anywhere deeper
+  const app = await loadTree({}, { rootDir: PATH_TO_APPLICATION, treePath: 'strayFile' });
+  assert.strictEqual(app.value, 'loaded');
+  assert.strictEqual(app.notes, undefined);
+});
+
 test('Root Directory', async () => {
   const rootDir = path.relative(process.cwd(), PATH_TO_APPLICATION);
   const app = await loadTree({}, { rootDir, treePath: 'groupDir' });

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- A file at the top of the tree that isn't `.js`, such as a `README.md` in `src/`, is skipped
+  as it is anywhere deeper, instead of failing the load with `ENOTDIR`.
+
 ## [2.0.0] - 2026-11-15
 
 ### Changed
