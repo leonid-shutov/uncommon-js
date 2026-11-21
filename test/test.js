@@ -169,6 +169,16 @@ test('Tree Root', async () => {
   assert.strictEqual(app.a, 'from b');
 });
 
+test('JSON Files', async () => {
+  const app = await loadTree({}, { rootDir: __dirname, treePath: 'json' });
+  assert.strictEqual(app.settings.theme, 'dark');
+  assert.strictEqual(app.book.title, 'Book');
+  assert.deepStrictEqual([...app.book.tags], ['fiction', 'classic']);
+  // parsed in the module's realm, not the loader's
+  assert.strictEqual(app.book.isLocal(app.book.tags), true);
+  assert.strictEqual(app.book.tags instanceof Object, false);
+});
+
 test('Root Directory', async () => {
   const rootDir = path.relative(process.cwd(), PATH_TO_APPLICATION);
   const app = await loadTree({}, { rootDir, treePath: 'groupDir' });

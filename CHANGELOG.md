@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- `.json` files load as data, keyed like `.js` files: `book/tags.json` becomes `app.book.tags`.
+  Each is parsed in the realm of its module, so its objects are that module's own.
+
 ### Changed
 
 - **Breaking:** the top of the tree loads like any directory below it. A numeric prefix on a

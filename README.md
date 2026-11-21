@@ -94,6 +94,7 @@ parentheses: a bare `{ ... }` is a block, and blocks export nothing.
 | ----------------- | ---------------------------------------------------------------------------------------- |
 | `book/`           | a submodule — `app.book`                                                                 |
 | `book/book.js`    | named after its own directory, so it merges _into_ the module instead of nesting         |
+| `book/tags.json`  | data, parsed — `app.book.tags`; named like a `.js` file                                  |
 | `1-config/`       | a numeric prefix sets load order and is stripped from the key — `app.config`             |
 | `(common)/`       | loaded first, into the **parent** context, shared with every sibling                     |
 | `(getters)/`      | each file is `() => value` and becomes a computed property, evaluated on every read      |
