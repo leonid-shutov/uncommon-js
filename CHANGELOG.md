@@ -13,6 +13,8 @@
   file there is stripped from its key, so `src/1-start.js` becomes `start` instead of
   `1-start`, and its files load after its directories instead of in alphabetical order
   among them.
+- **Breaking:** numbers in names compare as numbers, so `2-store/` loads before `10-ui/`
+  instead of after it, and the order no longer depends on the system locale.
 - **Breaking:** `node.*` leaves out Node's `_`-prefixed internals, such as `_http_agent` and
   `_tls_wrap`. Slash-named builtins stay, so `node['fs/promises']` and `node['stream/web']`
   are no longer slated for removal.

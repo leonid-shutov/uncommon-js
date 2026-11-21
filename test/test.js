@@ -176,6 +176,12 @@ test('Tree Root', async () => {
   assert.strictEqual(app.a, 'from b');
 });
 
+test('Load Order', async () => {
+  // numeric prefixes compare as numbers, so 2- loads before 10-
+  const app = await loadTree({}, { rootDir: __dirname, treePath: 'loadOrder' });
+  assert.strictEqual(app.ten, 10);
+});
+
 test('JSON Files', async () => {
   const app = await loadTree({}, { rootDir: __dirname, treePath: 'json' });
   assert.strictEqual(app.settings.theme, 'dark');

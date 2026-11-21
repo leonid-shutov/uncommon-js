@@ -20,7 +20,7 @@ module.exports = [
     },
   },
   {
-    files: ['test/application/**/*.js', 'test/treeRoot/**/*.js'],
+    files: ['test/{application,treeRoot,loadOrder}/**/*.js'],
     rules: {
       'no-undef': 'off',
     },
