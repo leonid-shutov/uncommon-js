@@ -132,7 +132,11 @@ test('Dependencies', async () => {
   assert.strictEqual(node.fs, require('node:fs'));
   assert.strictEqual(Object.keys(node).includes('undefined'), false);
   // prefix-only builtins, like node:sqlite, are keyed without the prefix
-  for (const name of builtinModules) assert.ok(name.replace(/^node:/, '') in node);
+  const publicBuiltins = builtinModules.filter((name) => !name.startsWith('_'));
+  for (const name of publicBuiltins) assert.ok(name.replace(/^node:/, '') in node);
+  // Node's internals are left out, slash-named builtins are kept
+  assert.ok(Object.keys(node).every((name) => !name.startsWith('_')));
+  assert.strictEqual(node['stream/web'], require('node:stream/web'));
 });
 
 test('Missing Dependency', async () => {
