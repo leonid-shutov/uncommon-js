@@ -35,6 +35,21 @@
   reachable as `node.sqlite` and `node.test`. They used to be listed as `node['node:sqlite']`,
   which always read as `null`.
 
+### Upgrading from 2.x
+
+- Run on Node 22.13 or later.
+- Drop the prefix where you reach a file at the top of the tree by its prefixed name:
+  `app['1-start']` becomes `app.start`.
+- Move a file at the top of the tree that a directory beside it uses while loading into
+  `(common)/` there: it now loads after the directories, while `(common)/` still loads first.
+- Check the order of unpadded numeric prefixes: `10-ui/` now loads after `2-store/`. Prefixes
+  padded to one width, like `01-` to `10-`, load as before.
+- Reach Node's internals through their public modules: `node.http` instead of
+  `node._http_agent`.
+- Where you checked a builtin for `null`, catch the error from reading it instead.
+- If you matched the message of a missing tree's error, check `error.code === 'ENOENT'`
+  instead.
+
 ## [2.0.0] - 2026-11-15
 
 ### Changed
