@@ -13,8 +13,8 @@ functions and point `types` at them, or drop the two dependencies.
 
 ## 2. Bun and Deno are not tested
 
-CI runs the linter on Node 26 and the suite on Node 20, 22, 24 and 26, so the `engines` floor
-(`node >= 20`) is verified. The Bun and Deno support the README advertises is not, and on Bun
+CI runs the linter on Node 26 and the suite on Node 22, 24 and 26, so the `engines` floor
+(`node >= 22.13`) is verified. The Bun and Deno support the README advertises is not, and on Bun
 it does not fully hold: `bun test ./test/test.js` fails one test on Bun 1.4.3. Bun ignores
 `vm.Script`'s `lineOffset`, so an error names the right file but a line two below the real
 one.

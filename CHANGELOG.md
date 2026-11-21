@@ -9,6 +9,8 @@
 
 ### Changed
 
+- **Breaking:** Node 22.13 or later is required. Node 20 reached its end of life on
+  2026-04-30.
 - **Breaking:** the top of the tree loads like any directory below it. A numeric prefix on a
   file there is stripped from its key, so `src/1-start.js` becomes `start` instead of
   `1-start`, and its files load after its directories instead of in alphabetical order
