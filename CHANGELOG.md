@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-11-21
+
 ### Added
 
 - `.json` files load as data, keyed like `.js` files: `book/tags.json` becomes `app.book.tags`.
@@ -96,5 +98,6 @@
 - If you compared `__rootDir` with a relative `rootDir`, compare it with
   `path.resolve(rootDir)`.
 
-[Unreleased]: https://github.com/leonid-shutov/uncommon-js/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/leonid-shutov/uncommon-js/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/leonid-shutov/uncommon-js/compare/v2.0.0...v3.0.0
 [2.0.0]: https://github.com/leonid-shutov/uncommon-js/compare/v1.0.2...v2.0.0
