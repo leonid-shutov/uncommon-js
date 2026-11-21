@@ -199,6 +199,11 @@ test('Root Directory', async () => {
   assert.strictEqual(app.__rootDir, PATH_TO_APPLICATION);
 });
 
+test('Absolute Tree Path', async () => {
+  const app = await loadTree({}, { rootDir: __dirname, treePath: path.join(__dirname, 'treeRoot') });
+  assert.strictEqual(app.first, 'first');
+});
+
 test('Missing Tree', async () => {
   const treePath = path.join(__dirname, 'missing');
   // a tree that isn't there fails with Node's own error, which names the absolute path

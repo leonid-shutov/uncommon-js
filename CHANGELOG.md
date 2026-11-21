@@ -29,6 +29,8 @@
 
 - A file at the top of the tree that isn't `.js`, such as a `README.md` in `src/`, is skipped
   as it is anywhere deeper, instead of failing the load with `ENOTDIR`.
+- An absolute `treePath` is used as it is, instead of being joined onto `rootDir` into a path
+  that doesn't exist.
 - Builtins that exist only with the `node:` prefix, such as `node:sqlite` and `node:test`, are
   reachable as `node.sqlite` and `node.test`. They used to be listed as `node['node:sqlite']`,
   which always read as `null`.
