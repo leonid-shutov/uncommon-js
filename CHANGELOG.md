@@ -20,6 +20,8 @@
 - **Breaking:** `node.*` leaves out Node's `_`-prefixed internals, such as `_http_agent` and
   `_tls_wrap`. Slash-named builtins stay, so `node['fs/promises']` and `node['stream/web']`
   are no longer slated for removal.
+- **Breaking:** a builtin that fails to load throws its error when read, instead of reading as
+  `null`.
 - A tree directory that cannot be read fails with Node's own error, such as `ENOENT` naming
   its absolute path, instead of one naming `rootDir` and `treePath`.
 
