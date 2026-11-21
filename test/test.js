@@ -4,6 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 const vm = require('node:vm');
 const path = require('node:path');
+const { builtinModules } = require('node:module');
 const { loadDir } = require('../lib/loader.js');
 const { loadTree } = require('../lib/tree.js');
 
@@ -130,6 +131,8 @@ test('Dependencies', async () => {
   assert.strictEqual(typeof Object.getOwnPropertyDescriptor(node, 'fs').get, 'function');
   assert.strictEqual(node.fs, require('node:fs'));
   assert.strictEqual(Object.keys(node).includes('undefined'), false);
+  // prefix-only builtins, like node:sqlite, are keyed without the prefix
+  for (const name of builtinModules) assert.ok(name.replace(/^node:/, '') in node);
 });
 
 test('Missing Dependency', async () => {
